@@ -49,191 +49,201 @@ namespace program
 
     abstract class CompObj<Node> // Базовый класс - комбинаторный объект
     {
-        abstract public bool Next();
-        abstract override public string ToString();
-    }
-
-    class PlacementWR<Node> : CompObj<Node> // Размещения с повторениями
-    {
         Alphabet<Node> a;
-        int k;
         List<int> obj;
+        int k;
+
+        public CompObj(Alphabet<Node> s)
+        {
+            a = new Alphabet<Node>(s);
+            obj = new List<int>();
+        }
+
+        public Alphabet<Node> A
+        {
+            get
+            {
+                return a;
+            }
+        }
+
+        public int N
+        {
+            get
+            {
+                return a.N;
+            }
+        }
+
+        public int K
+        {
+            get
+            {
+                return k;
+            }
+            protected set
+            {
+                k = value;
+            }
+        }
+
+        public List<Node> GetNode
+        {
+            get
+            {
+                List<Node> result = new List<Node>();
+                for (int i = 0; i < K; i++)
+                    result.Add(a[Obj[i]]);
+                return result;
+            }
+        }
+
         public List<int> Obj
         {
             get
             {
                 return obj;
             }
+            protected set
+            {
+                obj = value;
+            }
         }
-        public PlacementWR(Alphabet<Node> s, int k)
+
+        abstract public bool Next();
+
+        override public string ToString() {
+            String result = "";
+            foreach (Node i in GetNode)
+                result += i.ToString() + " ";
+            return result;
+        }
+    }
+
+    class PlacementWR<Node> : CompObj<Node> // Размещения с повторениями
+    {
+        public PlacementWR(Alphabet<Node> s, int k) : base(s)
         {
-            this.k = k;
-            a = new Alphabet<Node>(s);
-            obj = new List<int>();
+            K = k;
             for (int i = 0; i < k; i++)
-                obj.Add(0);
+                Obj.Add(0);
         }
 
         override public bool Next()
         {
-            int i = k - 1;
+            int i = K - 1;
 
-            while (i >= 0 && obj[i] == a.N - 1)
+            while (i >= 0 && Obj[i] == N - 1)
                 i--;
 
             if (i >= 0)
             {
-                obj[i]++;
+                Obj[i]++;
                 i++;
-                for (; i < k; i++)
-                    obj[i] = 0;
+                    Obj[i] = 0;
                 return true;
             }
 
             return false;
         }
-
-        override public String ToString()
-        {
-            String result = "";
-            for (int i = 0; i < k; i++)
-                result += a[obj[i]].ToString() + " ";
-
-            return result;
-        }
     }
 
     class Permut<Node> : CompObj<Node> // Перестановки
     {
-        Alphabet<Node> a;
-        int k;
-        List<int> obj;
-
-        public Permut(Alphabet<Node> Alf)
+        public Permut(Alphabet<Node> Alf) : base(Alf)
         {
-            a = new Alphabet<Node>(Alf);
-            k = a.N;
-            obj = new List<int>();
-            for (int i = 0; i < k; i++)
-                obj.Add(i);
+            K = N;
+            for (int i = 0; i < K; i++)
+                Obj.Add(i);
         }
 
         private void Swap(int ind1, int ind2)
         {
-            int temp = obj[ind1];
-            obj[ind1] = obj[ind2];
-            obj[ind2] = temp;
+            int temp = Obj[ind1];
+            Obj[ind1] = Obj[ind2];
+            Obj[ind2] = temp;
         }
 
         public override bool Next()
         {
             int frst;
-            for (frst = k - 2; frst >= 0 && obj[frst] >= obj[frst + 1]; frst--) ;
+            for (frst = K - 2; frst >= 0 && Obj[frst] >= Obj[frst + 1]; frst--) ;
 
             if (frst == -1)
                 return false;
 
             int scnd;
-            for (scnd = k - 1; scnd >= 0 && obj[frst] >= obj[scnd]; scnd--) ;
+            for (scnd = K - 1; scnd >= 0 && Obj[frst] >= Obj[scnd]; scnd--) ;
 
             Swap(frst, scnd);
 
-            for (int begin = frst + 1, end = k - 1; begin < end; begin++, end--)
+            for (int begin = frst + 1, end = K - 1; begin < end; begin++, end--)
                 Swap(begin, end);
 
             return true;
-        }
-
-        public override string ToString()
-        {
-            String result = "";
-            for (int i = 0; i < k; i++)
-                result += a[obj[i]].ToString() + " ";
-
-            return result;
         }
     }
 
     class Placement<Node> : CompObj<Node> // Размещения без повторений
     {
-        Alphabet<Node> a;
-        int k, n;
-        List<int> obj;
-
-        public Placement(Alphabet<Node> Alf, int k)
+        public Placement(Alphabet<Node> Alf, int k) : base(Alf)
         {
-
-            a = new Alphabet<Node>(Alf);
-            obj = new List<int>();
-            this.k = k;
-            this.n = a.N;
-            for (int i = 0; i < a.N; i++)
-                obj.Add(i);
+            K = k;
+            for (int i = 0; i < N; i++)
+                Obj.Add(i);
         }
 
         private void Swap(int ind1, int ind2)
         {
-            int temp = obj[ind1];
-            obj[ind1] = obj[ind2];
-            obj[ind2] = temp;
+            int temp = Obj[ind1];
+            Obj[ind1] = Obj[ind2];
+            Obj[ind2] = temp;
         }
         public override bool Next()
         {
             int frst;
             do
             {
-                for (frst = n - 2; frst >= 0 && obj[frst] >= obj[frst + 1]; frst--) ;
+                for (frst = N - 2; frst >= 0 && Obj[frst] >= Obj[frst + 1]; frst--) ;
 
                 if (frst == -1)
                     return false;
 
                 int scnd;
-                for (scnd = n - 1; scnd >= 0 && obj[frst] >= obj[scnd]; scnd--) ;
+                for (scnd = N - 1; scnd >= 0 && Obj[frst] >= Obj[scnd]; scnd--) ;
 
                 Swap(frst, scnd);
 
-                for (int begin = frst + 1, end = n - 1; begin < end; begin++, end--)
+                for (int begin = frst + 1, end = N - 1; begin < end; begin++, end--)
                     Swap(begin, end);
 
-            } while (frst > k - 1);
+            } while (frst > K - 1);
             return true;
-        }
-
-        public override string ToString()
-        {
-            String result = "";
-            for (int i = 0; i < k; i++)
-                result += a[obj[i]].ToString() + " ";
-
-            return result;
         }
     }
 
     class Subset<Node> : CompObj<Node> // Подмножества
     {
-        Alphabet<Node> a;
-        int k, number;
-        List<int> obj;
-        public Subset(Alphabet<Node> Alf)
+        int number;
+
+        public Subset(Alphabet<Node> Alf) : base(Alf)
         {
-            a = new Alphabet<Node>(Alf);
             number = 0;
-            k = a.N;
-            obj = new List<int>();
-            for (int i = 0; i < k; i++)
-                obj.Add(-1);
+            K = N;
+            for (int i = 0; i < K; i++)
+                Obj.Add(-1);
         }
         public override bool Next()
         {
-            if (number == Math.Pow(2, k) - 1)
+            if (number == Math.Pow(2, K) - 1)
                 return false;
             number++;
-            for (int i = k - 1; i >= 0; i--)
+            for (int i = K - 1; i >= 0; i--)
             {
-                if ((int)(number / Math.Pow(2, k - 1 - i)) % 2 == 1)
-                    obj[i] = i;
+                if ((int)(number / Math.Pow(2, K - 1 - i)) % 2 == 1)
+                    Obj[i] = i;
                 else
-                    obj[i] = -1;
+                    Obj[i] = -1;
             }
             return true;
         }
@@ -247,16 +257,17 @@ namespace program
             {
                 result = "{";
                 int i;
-                for (i = 0; i < k; i++)
-                    if (obj[i] != -1)
+
+                for (i = 0; i < K; i++)
+                    if (Obj[i] != -1)
                     {
-                        result += a[obj[i]].ToString();
+                        result += A[Obj[i]].ToString();
                         break;
                     }
 
-                for (i++; i < k; i++)
-                    if (obj[i] != -1)
-                        result += ", " + a[obj[i]].ToString();
+                for (i++; i < K; i++)
+                    if (Obj[i] != -1)
+                        result += ", " + A[Obj[i]].ToString();
 
                 result += "}";
             }
@@ -266,23 +277,17 @@ namespace program
 
     class Combinations<Node> : CompObj<Node> // Сочетания
     {
-        Alphabet<Node> a;
-        int k, n;
-        List<int> obj;
-        public Combinations(Alphabet<Node> Alf, int k)
+        public Combinations(Alphabet<Node> Alf, int k) : base(Alf)
         {
-            this.k = k;
-            this.n = Alf.N;
-            a = new Alphabet<Node>(Alf);
-            obj = new List<int>();
-            for (int i = 0; i < k; i++)
-                obj.Add(i);
+            K = k;
+            for (int i = 0; i < K; i++)
+                Obj.Add(i);
         }
         public override bool Next()
         {
             int ind = -1;
-            for (int i = k - 1, j = n - 1; i >= 0; i--, j--)
-                if (obj[i] != j)
+            for (int i = K - 1, j = N - 1; i >= 0; i--, j--)
+                if (Obj[i] != j)
                 {
                     ind = i;
                     break;
@@ -291,73 +296,41 @@ namespace program
             if (ind == -1)
                 return false;
 
-            obj[ind]++;
-            for (int i = ind + 1; i < k; i++)
-                obj[i] = obj[i - 1] + 1;
+            Obj[ind]++;
+            for (int i = ind + 1; i < K; i++)
+                Obj[i] = Obj[i - 1] + 1;
 
 
             return true;
-        }
-
-        public override string ToString()
-        {
-            String result = "";
-            for (int i = 0; i < k; i++)
-                result += a[obj[i]].ToString() + " ";
-
-            return result;
         }
     }
 
     class CombinationsWR<Node> : CompObj<Node> // Сочетания с повторениями
     {
-        Alphabet<Node> a;
-        int k;
-        List<int> obj;
-
-        public List<int> Obj
+        public CombinationsWR(Alphabet<Node> s, int k) : base(s)
         {
-            get
-            {
-                return obj;
-            }
-        }
-
-        public CombinationsWR(Alphabet<Node> s, int k)
-        {
-            this.k = k;
-            a = new Alphabet<Node>(s);
-            obj = new List<int>();
-            for (int i = 0; i < k; i++)
-                obj.Add(0);
+            K = k;
+            for (int i = 0; i < K; i++)
+                Obj.Add(0);
         }
 
         override public bool Next()
         {
-            int i = k - 1;
+            int i = K - 1;
 
-            while (i >= 0 && obj[i] == a.N - 1)
+            while (i >= 0 && Obj[i] == N - 1)
                 i--;
 
             if (i >= 0)
             {
-                obj[i]++;
+                Obj[i]++;
                 i++;
-                for (; i < k; i++)
-                    obj[i] = obj[i - 1];
+                for (; i < K; i++)
+                    Obj[i] = Obj[i - 1];
                 return true;
             }
 
             return false;
-        }
-
-        override public String ToString()
-        {
-            String result = "";
-            for (int i = 0; i < k; i++)
-                result += a[obj[i]].ToString() + " ";
-
-            return result;
         }
     }
 
