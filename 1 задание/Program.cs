@@ -140,6 +140,7 @@ namespace program
             {
                 Obj[i]++;
                 i++;
+                for (; i < K; i++)
                     Obj[i] = 0;
                 return true;
             }
